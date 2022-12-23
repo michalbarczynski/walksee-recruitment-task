@@ -1,0 +1,21 @@
+{
+  "name": "zadankofullstaczek",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ZadankoFullStaczek.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ZadankoFullStaczek.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jsdom-quokka-plugin": "^1.0.16",
+    "localforage": "^1.10.0",
+    "localforage-driver-memory": "^1.0.5",
+    "localforage-getitems": "^1.4.2",
+    "localforage-removeitems": "^1.4.0",
+    "localforage-setitems": "^1.4.0"
+  }
+}
