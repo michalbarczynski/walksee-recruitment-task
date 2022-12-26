@@ -1,3 +1,16 @@
+var worker = new Worker('Background.js');
+
+worker.addEventListener('message', function(e) {
+  alert('otrzymano odpowiedź: ' + e.data);
+}, false);
+
+// wyslanie wiadomosci start
+worker.postMessage('start');
+
+// wyslanie wiadomosci stop
+worker.postMessage('stop');
+
+
 class Queue {
   constructor(name) {
     this.name = name;
@@ -5,7 +18,7 @@ class Queue {
     const isQueueNotExists = !window.localStorage.getItem(name);
 
     if(isQueueNotExists) {
-      // stworz pusta kolejke
+      
       window.localStorage.setItem(name, '');
       this.tail = undefined;
       this.head = undefined;
@@ -19,40 +32,41 @@ class Queue {
       this.head = headValue;
     }
   }
-    // enkapsulacje privatami dodac
-    push_head(element) {
-      const lastIndexValueKey = this.name + 'LastIndex';
-      const lastIndexValue = window.localStorage.getItem(lastIndexValueKey);
-      const lastIndexValueIncrementedByOne = lastIndexValue + 1;
-      
-      if(lastIndexValue == undefined) {
-        const startIndex = 0;
-        const elementValueKey = this.name + 'Element-' + startIndex + '-Value';
 
-        window.localStorage.setItem(elementValueKey, element);
-        window.localStorage.setItem(lastIndexValueKey, startIndex);
+    push_head(element) {
+      const lastIndexKey = this.name + 'LastIndex';
+      const randomDigitToBeAddedToUniqueID = Math.floor(Math.random() * 10);
+      const lastIndexValue = window.localStorage.getItem(lastIndexKey);
+      const lastIndexValueWithDigitAdded = lastIndexValue + randomDigitToBeAddedToUniqueID;
+
+      if(lastIndexValue == undefined) {
+        const startIndex = randomDigitToBeAddedToUniqueID;
+        const elementKey = this.name + 'Element-' + startIndex + '-Value';
+
+        window.localStorage.setItem(elementKey, element);
+        window.localStorage.setItem(lastIndexKey, startIndex);
       } else {
         
-        const elementValueKey = this.name + 'Element-' + lastIndexValueIncrementedByOne + '-Value';
+        const elementKey = this.name + 'Element-' + lastIndexValueWithDigitAdded + '-Value';
 
-        const elementPrevKey = this.name + 'Element-' + lastIndexValueIncrementedByOne + '-Prev';
+        const elementPrevKey = this.name + 'Element-' + lastIndexValueWithDigitAdded + '-Prev';
         const elementPrevValue = this.name + 'Element-' + lastIndexValue;
 
         window.localStorage.setItem(elementPrevKey, elementPrevValue);
-        window.localStorage.setItem(elementValueKey, element);
-        window.localStorage.setItem(lastIndexValueKey, lastIndexValueIncrementedByOne);
+        window.localStorage.setItem(elementKey, element);
+        window.localStorage.setItem(lastIndexKey, lastIndexValueWithDigitAdded);
 
-        window.localStorage.setItem(this.name + 'Element-' + lastIndexValue + '-Next', elementValueKey.replace('-Value', ''));
+        window.localStorage.setItem(this.name + 'Element-' + lastIndexValue + '-Next', elementKey.replace('-Value', ''));
       }
 
-      const headValue = this.name + 'Element-' + lastIndexValueIncrementedByOne;
+      const headValue = this.name + 'Element-' + lastIndexValueWithDigitAdded;
       this.head = this.name + 'Head';
       window.localStorage.setItem(this.name + 'Head', headValue);
     }
 
     pop_tail() {
-      const tailValueKey = this.name + 'Tail';
-      const tailValue = window.localStorage.getItem(tailValueKey);
+      const tailKey = this.name + 'Tail';
+      const tailValue = window.localStorage.getItem(tailKey);
 
       if(tailValue == undefined)
         return 
@@ -66,7 +80,7 @@ class Queue {
       window.localStorage.setItem(tailValue, prevValue);
       window.localStorage.removeItem(prevValue + '-Next');
 
-      this.tail = tailValueKey;
+      this.tail = tailKey;
     }
     
     head() {
@@ -78,9 +92,7 @@ class Queue {
     }
 };
 
-//someFifoMethodName = ('nazwa metoedy zaimplementowanej na localForage')
 const fifo = new Queue('Bob'); 
 
-
-document.querySelector('.push').addEventListener('click', fifo.push_head(new Date().toString()));
-document.querySelector('.remove').addEventListener('click', fifo.pop_tail());
+fifo.push_head(69);
+fifo.pop_tail();
