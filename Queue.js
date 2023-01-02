@@ -10,88 +10,67 @@
 // wyslanie wiadomosci stop
 // worker.postMessage('stop');
 
+class Element {
+  prev;
+  next;
+  value;
+}
+
 class Queue {
+index = 0;
+elements = [];
+
   constructor(name) {
     this.name = name;
 
-    const isQueueNotExists = !window.localStorage.getItem(name);
+    const queueString = window.localStorage.getItem(name);
 
-    if(isQueueNotExists) {
-      
-      window.localStorage.setItem(name, '');
-      this.tail = undefined;
-      this.head = undefined;
-      this.lastIndex = undefined;
-
+    if (queueString) {
+      let tempQfromStorage = JSON.parse(queueString);
+      this.elements = tempQfromStorage.elements;
+      this.index = tempQfromStorage.index;
     } else {
-      const headValue = window.localStorage.getItem(name + 'Head');
-      const tailValue = window.localStorage.getItem(name + 'Tail');
-
-      this.tail = tailValue;
-      this.head = headValue;
+      window.localStorage.setItem(name, JSON.stringify(this));
     }
-  }
+}
 
-    push_head(element) {
-      const lastIndexKey = this.name + 'LastIndex';
-      const randomDigitToBeAddedToUniqueID = Math.floor(Math.random() * 10);
-      const lastIndexValue = window.localStorage.getItem(lastIndexKey);
-      const lastIndexValueWithDigitAdded = lastIndexValue + randomDigitToBeAddedToUniqueID;
+    push() {
+    const element = new Element();
+    element.value ='Element-' + this.index++;
 
-      if(lastIndexValue == undefined) {
-        const startIndex = randomDigitToBeAddedToUniqueID;
-        const elementKey = this.name + 'Element-' + startIndex + '-Value';
-
-        window.localStorage.setItem(elementKey, element);
-        window.localStorage.setItem(lastIndexKey, startIndex);
-      } else {
-        
-        const elementKey = this.name + 'Element-' + lastIndexValueWithDigitAdded + '-Value';
-
-        const elementPrevKey = this.name + 'Element-' + lastIndexValueWithDigitAdded + '-Prev';
-        const elementPrevValue = this.name + 'Element-' + lastIndexValue;
-
-        window.localStorage.setItem(elementPrevKey, elementPrevValue);
-        window.localStorage.setItem(elementKey, element);
-        window.localStorage.setItem(lastIndexKey, lastIndexValueWithDigitAdded);
-
-        window.localStorage.setItem(this.name + 'Element-' + lastIndexValue + '-Next', elementKey.replace('-Value', ''));
-      }
-
-      const headValue = this.name + 'Element-' + lastIndexValueWithDigitAdded;
-      this.head = this.name + 'Head';
-      window.localStorage.setItem(this.name + 'Head', headValue);
+    const lastElement = this.elements[this.elements.length - 1];
+    
+    if(this.elements.length > 0) {
+      lastElement.next = this.elements.length;
+      element.prev = this.elements.length - 1;
+    } 
+    this.elements.push(element);
+    this.saveToStorage(this);
     }
 
-    pop_tail() {
-      const tailKey = this.name + 'Tail';
-      const tailValue = window.localStorage.getItem(tailKey);
-
-      if(tailValue == undefined)
-        return 
-
-      const prevValue = window.localStorage.getItem(tailValue + '-Prev');
-
-      window.localStorage.removeItem(tailValue + '-Value');
-      window.localStorage.removeItem(tailValue + '-Prev');
-      window.localStorage.removeItem(tailValue + '-Next');
-
-      window.localStorage.setItem(tailValue, prevValue);
-      window.localStorage.removeItem(prevValue + '-Next');
-
-      this.tail = tailValue;
+    pop() {
+      this.elements.pop();
+      this.saveToStorage(this.name);
     }
     
     show_head() {
-      window.localStorage.getItem(this.head);
+      return this.elements[0];
     }
     
     show_tail() {
-      window.localStorage.getItem(this.tail);
+      return this.elements[this.elements.length - 1];
+    }
+
+    saveToStorage(queue) {
+      window.localStorage.setItem(queue.name, JSON.stringify(queue));
     }
 };
 
 const fifo = new Queue('Bob'); 
 
-fifo.push_head('test');
-fifo.pop_tail();
+fifo.push();
+fifo.push();
+fifo.pop();
+console.log(fifo.pop());
+
+
